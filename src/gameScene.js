@@ -8,13 +8,15 @@ const MAX_OFFERS = 10
 let mouse
 /** @type {Phaser.Cameras.Scene2D.Camera} */
 let cam
-
 /** @type {Phaser.GameObjects.BitmapText} */
 let spaceText
-
+/** @type {HTMLElement} */
 let offersEl
+/** @type {HTMLElement} */
+let rentersEl
 
 const tempOffers = []
+const renters = []
 
 export const gameScene = new Phaser.Scene('gameScene')
 gameScene.create = function () {
@@ -25,58 +27,19 @@ gameScene.create = function () {
   gameScene.add.dom(20, 20, side).setOrigin(0)
 
   offersEl = side.querySelector('.offers')
-  offersEl.addEventListener('click', e => {
-    /** @type {HTMLElement} */
-    const target = e.target
-    if (target.classList.contains('accept')) {
-      const uid = target.dataset.uid
-      // console.log({ index })
-      const index = tempOffers.findIndex(o => o.uid === uid)
-      if (index === -1) throw `offer not found uid:${uid}`
+  offersEl.addEventListener('click', handleOfferClick)
 
-      const item = tempOffers[index]
-      // console.log({ item })
-      // const parent = target.parentNode.parentNode
-      // console.log(target.dataset.uid)
-      // const uid = target.dataset.uid
-      // console.log(g.stats.offers[uid])
-      if (g.stats.space >= item.space) {
-        g.stats.space -= item.space
-        updateSpaceText()
-        // Phaser.Utils.Array.SpliceOne(tempOffers, index)
-        // offersEl.removeChild(target.parentNode.parentNode)
-        removeOffer(index, target.parentNode.parentNode)
-      } else {
-        console.log('Not enough space')
-      }
-    } else if (target.classList.contains('reject')) {
-      const uid = target.dataset.uid
-      const index = tempOffers.findIndex(o => o.uid === uid)
-      // delete g.stats.offers[uid]
-      // delete tempOffers[uid]
-      // console.log(tempOffers)
-      // console.log( g.stats.offers[target.dataset.uid])
-      // console.log(g.stats.offers)
-      // Phaser.Utils.Array.SpliceOne(tempOffers, index)
-      // offersEl.removeChild()
-      removeOffer(index, target.parentNode.parentNode)
-    }
-  })
+  rentersEl = side.querySelector('.renters')
+  rentersEl.addEventListener('click', handleRenterClick)
 
   gameScene.time.addEvent({
-    delay: 500,
+    delay: 2500,
     repeat: -1,
-    callback() {
-      // console.log(offersEl.children.length)
-      if (offersEl.children.length < MAX_OFFERS) {
-        const offer = generateAnOffer(randi(1, 17), randi(7, 99))
-        offersEl.appendChild(offer)
-      }
-    },
+    startAt: 2200,
+    callback: generateOffers,
   })
 
   const ssd = gameScene.add.image(g.w - 20, 20, png.ssd).setOrigin(1, 0)
-
   spaceText = gameScene.add
     .bitmapText(g.w - 20, g.h - 20, fnt.topaz, 'Space: 100/100')
     .setOrigin(1)
@@ -86,24 +49,82 @@ gameScene.create = function () {
 
 gameScene.update = () => {}
 
+function generateOffers() {
+  if (offersEl.children.length < MAX_OFFERS) {
+    const offer = createOffer(randi(1, 17), randi(7, 99))
+    offersEl.appendChild(offer)
+  }
+}
+
+function handleRenterClick() {
+  return e => {
+    /** @type {HTMLElement} */
+    const target = e.target
+    if (target.classList.contains('eject')) {
+      const index = getIndex(target, renters)
+      const item = renters[index]
+      g.stats.space += item.space
+      updateSpaceText()
+      removeRenter(index, target.parentNode.parentNode)
+    }
+  }
+}
+
+function handleOfferClick(e) {
+  /** @type {HTMLElement} */
+  const target = e.target
+  // console.log(target)
+  if (target.classList.contains('accept')) {
+    const index = getIndex(target, tempOffers)
+    const item = tempOffers[index]
+    if (g.stats.space >= item.space) {
+      g.stats.space -= item.space
+      updateSpaceText()
+      removeOffer(index, target.parentNode.parentNode)
+
+      const el = createRenter(item)
+      rentersEl.appendChild(el)
+    } else {
+      // Add stuff later
+      console.log('Not enough space')
+    }
+  } else if (target.classList.contains('reject')) {
+    const index = getIndex(target, tempOffers)
+    removeOffer(index, target.parentNode.parentNode)
+  }
+}
+
 function init() {
   mouse = gameScene.input.activePointer
   cam = gameScene.cameras.main
 }
 
-function generateAnOffer(space, rent) {
+function getIndex(target, list) {
+  const uid = target.parentNode.dataset.uid
+  const index = list.findIndex(o => o.uid === uid)
+  if (index === -1) throw `renter not found uid:${uid}`
+  return index
+}
+
+function createRenter(data) {
+  addRenter(data)
+  const el = document.createElement('div')
+  el.className = 'offer'
+  el.innerHTML = `
+<div class="offer-details">
+  <div class="space">${data.space}</div>
+  <div class="rent">${data.rent}</div>
+</div>
+<div class="actions" data-uid=${data.uid}>
+  <div class="hov eject">Eject</div>
+</div>`
+  return el
+}
+
+function createOffer(space, rent) {
   const uid = Phaser.Math.RND.uuid()
-  // g.stats.offers[uid] = {
-  //   space,
-  //   rent,
-  // }
-  // tempOffers[uid] = {
-  //   space,
-  //   rent,
-  // }
   const newItem = { uid, space, rent }
   tempOffers.push(newItem)
-  // const index = tempOffers.indexOf(newItem)
   const el = document.createElement('div')
   el.className = 'offer'
   el.innerHTML = `
@@ -111,9 +132,12 @@ function generateAnOffer(space, rent) {
   <div class="space">${space}</div>
   <div class="rent">${rent}</div>
 </div>
-<div class="actions">
-  <div class="hov accept" data-uid="${uid}" >accept</div>
-  <div class="hov reject">reject</div>
+
+<div class="actions" data-uid=${uid}>
+
+  <div class="hov accept">Accept</div>
+  <div class="hov reject">Reject</div>
+
 </div>`
   return el
 }
@@ -122,15 +146,15 @@ function removeOffer(index, child) {
   Phaser.Utils.Array.SpliceOne(tempOffers, index)
   offersEl.removeChild(child)
 }
-// function removeOffer(uid, child) {
-//   const index = tempOffers.findIndex(i => i.uid === uid)
-//   if (index !== -1) {
-//     Phaser.Utils.Array.SpliceOne(tempOffers, index)
-//     offersEl.removeChild(child)
-//   } else {
-//     throw `cant remove item with uid ${uid}`
-//   }
-// }
+
+function addRenter(renter) {
+  renters.push(renter)
+}
+
+function removeRenter(index, child) {
+  Phaser.Utils.Array.SpliceOne(renters, index)
+  rentersEl.removeChild(child)
+}
 
 function updateSpaceText() {
   spaceText.text = `Space: ${g.stats.space}/100`

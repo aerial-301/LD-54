@@ -60,7 +60,19 @@ body {
   padding: 0.3rem;
   width: 294px;
   height: 200px;
-  overflow-y: auto;
+  overflow-y: scroll;
+}
+
+.renters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  background-color: var(--blue2);
+  padding: 0.3rem;
+  width: 294px;
+  height: 172px;
+  margin: 0.2rem 0 0 0;
+  overflow-y: scroll;
 }
 
 .sb::-webkit-scrollbar-track {
