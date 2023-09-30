@@ -1,35 +1,33 @@
 :root {
-  /*  */
   --blue1: #172038;
   --blue2: #253a5e;
   --blue3: #3c5e8b;
   --blue4: #4f8fba;
   --blue5: #73bed3;
   --blue6: #a4dddb;
-  /*  */
+
   --purple1: #1e1d39;
   --purple2: #402751;
   --purple3: #7a367b;
   --purple4: #a23e8c;
   --purple5: #c65197;
   --purple6: #df84a5;
-  /*  */
+
   --green1: #19332d;
   --green2: #25562e;
   --green3: #468232;
   --green4: #75a743;
   --green5: #a8ca58;
   --green6: #d0da91;
-  /*  */
+
   --red1: #241527;
   --red2: #411d31;
   --red3: #752438;
   --red4: #a53030;
   --red5: #cf573c;
   --red6: #da863e;
-
   --white: #ebede9;
-  --black: ##090a14;
+  --black: #090a14;
 
   font-size: 16px;
 }
@@ -58,8 +56,10 @@ body {
   gap: 0.1rem;
   background-color: var(--purple1);
   padding: 0.3rem;
-  width: 294px;
+  width: 292px;
   height: 200px;
+  margin: 0 0 0.4rem 0;
+
   overflow-y: scroll;
 }
 
@@ -67,11 +67,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
-  background-color: var(--blue2);
+  background-color: var(--purple1);
   padding: 0.3rem;
-  width: 294px;
+  width: 292px;
   height: 172px;
-  margin: 0.2rem 0 0 0;
+  /* margin: 0.0rem 0 0 0; */
   overflow-y: scroll;
 }
 
@@ -132,21 +132,34 @@ body {
 
 .accept {
   background-color: var(--green1);
-  color: var(--green6);
+  /* color: var(--green6); */
 }
 
 .reject {
-  background-color: var(--red2);
-  color: var(--red6);
+  background-color: var(--red3);
+  /* color: var(--red6); */
+}
+
+.eject {
+  background-color: var(--red3);
 }
 
 .sort-btns {
   display: flex;
   justify-content: space-around;
+  align-items: center;
   background-color: var(--red3);
-  padding: 0.4rem;
-  margin: 0 0 0.2rem 0;
+  padding: 0.1rem;
+  margin: 0 0 0rem 0;
   /* gap: 1rem; */
+  font-size: 0.56rem;
+}
+.space-btn,
+.rent-btn {
+  font-size: 0.5rem;
+  background-color: var(--red2);
+  color: var(--red6);
+  padding: 0.2rem 1.4rem;
 }
 
 .hov:hover {
@@ -157,14 +170,12 @@ body {
   filter: saturate(1) brightness(0.7);
 }
 
-.space-btn,
-.rent-btn {
-  background-color: var(--red2);
-  color: var(--red6);
-  padding: 0.4rem 1rem;
+.cover {
+  background-color: var(--black);
+  width: 100% !important;
+  height: 100% !important;
 }
 
-.space-btn {
-}
-.rent-btn {
+#tobe1 {
+  display: none;
 }

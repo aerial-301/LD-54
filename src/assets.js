@@ -1,5 +1,6 @@
 export const png = {
   "bg": "bg",
+  "nextButton": "nextButton",
   "ssd": "ssd",
   "topaz_0": "topaz_0"
 }

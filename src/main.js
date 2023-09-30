@@ -1,6 +1,7 @@
 import 'phaser'
 import { gameScene } from './gameScene'
 import { loadingScene } from './loadingScene'
+import { uiScene } from './uiScene'
 const parent = 'main'
 export const game = new Phaser.Game({
   type: Phaser.WEBGL,
@@ -25,16 +26,17 @@ export const game = new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
     autoRound: true,
+
     min: {
-      width: 320,
-      height: 180,
+      width: 640,
+      height: 460,
     },
     max: {
       width: 1280,
       height: 720,
     },
   },
-  scene: [loadingScene, gameScene],
+  scene: [loadingScene, gameScene, uiScene],
 })
 window.oncontextmenu = e => {
   e.preventDefault()
