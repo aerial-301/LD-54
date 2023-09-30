@@ -9,16 +9,18 @@ export const game = new Phaser.Game({
   parent: parent,
   fullscreenTarget: parent,
   backgroundColor: '#111',
-  disableContextMenu: true,
+
   pixelArt: true,
   dom: {
     createContainer: true,
   },
+
   input: {
     mouse: {
       preventDefaultDown: true,
     },
   },
+  disableContextMenu: true,
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
@@ -34,3 +36,6 @@ export const game = new Phaser.Game({
   },
   scene: [loadingScene, gameScene],
 })
+window.oncontextmenu = e => {
+  e.preventDefault()
+}

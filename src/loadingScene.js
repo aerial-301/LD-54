@@ -12,8 +12,12 @@ export const g = {
   m: Phaser.Math,
   depths: depths,
   pal: pal,
-  stats: {},
+  stats: {
+    space: 100,
+    offers: {}
+  },
   sys: undefined,
+
 }
 
 export const loadingScene = new Phaser.Scene('loadingScene')

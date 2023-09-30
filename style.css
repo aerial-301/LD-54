@@ -1,4 +1,42 @@
 :root {
+  /*  */
+  --blue1: #172038;
+  --blue2: #253a5e;
+  --blue3: #3c5e8b;
+  --blue4: #4f8fba;
+  --blue5: #73bed3;
+  --blue6: #a4dddb;
+  /*  */
+  --purple1: #1e1d39;
+  --purple2: #402751;
+  --purple3: #7a367b;
+  --purple4: #a23e8c;
+  --purple5: #c65197;
+  --purple6: #df84a5;
+  /*  */
+  --green1: #19332d;
+  --green2: #25562e;
+  --green3: #468232;
+  --green4: #75a743;
+  --green5: #a8ca58;
+  --green6: #d0da91;
+  /*  */
+  --red1: #241527;
+  --red2: #411d31;
+  --red3: #752438;
+  --red4: #a53030;
+  --red5: #cf573c;
+  --red6: #da863e;
+
+  --white: #ebede9;
+  --black: ##090a14;
+
+  font-size: 16px;
+}
+
+@font-face {
+  font-family: topaz;
+  src: url(./topaz.ttf);
 }
 
 * {
@@ -8,5 +46,113 @@
   user-select: none;
 }
 body {
-  background-color: #000;
+  background-color: var(--purple1);
+  font-family: topaz, monospace;
+  color: var(--white);
+  /* image-rendering: pixelated !important; */
+}
+
+.offers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  background-color: var(--purple1);
+  padding: 0.3rem;
+  width: 294px;
+  height: 200px;
+  overflow-y: auto;
+}
+
+.sb::-webkit-scrollbar-track {
+  background-color: var(--purple3);
+}
+.sb::-webkit-scrollbar {
+  width: 1rem;
+}
+.sb::-webkit-scrollbar-thumb {
+  background-color: var(--purple5);
+}
+.offer {
+  display: flex;
+  gap: 0.2rem;
+  font-size: 0.7rem;
+  background-color: var(--purple2);
+  padding: 0.32rem;
+}
+.offer:hover {
+  background-color: var(--purple6);
+}
+.offer-details {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  background-color: var(--blue3);
+  padding: 0.4rem;
+}
+.space {
+}
+.space::after {
+  content: ' Mb';
+}
+.rent {
+  white-space: pre;
+}
+.rent::after {
+  content: '/s';
+}
+.rent::before {
+  content: '$';
+}
+
+.actions {
+  display: flex;
+  /* flex-direction: column; */
+  gap: 0.2rem;
+}
+
+.actions > * {
+  font-size: 0.5rem;
+  text-align: center;
+  padding: 0.2rem;
+  line-height: 1rem;
+}
+
+.accept {
+  background-color: var(--green1);
+  color: var(--green6);
+}
+
+.reject {
+  background-color: var(--red2);
+  color: var(--red6);
+}
+
+.sort-btns {
+  display: flex;
+  justify-content: space-around;
+  background-color: var(--red3);
+  padding: 0.4rem;
+  margin: 0 0 0.2rem 0;
+  /* gap: 1rem; */
+}
+
+.hov:hover {
+  filter: brightness(2.5);
+}
+
+.hov:active {
+  filter: saturate(1) brightness(0.7);
+}
+
+.space-btn,
+.rent-btn {
+  background-color: var(--red2);
+  color: var(--red6);
+  padding: 0.4rem 1rem;
+}
+
+.space-btn {
+}
+.rent-btn {
 }
