@@ -1,4 +1,8 @@
 let throttle = {}
+
+export function clearT() {
+  throttle = {}
+}
 export function throttledCall(
   scene,
   func,

@@ -2,10 +2,12 @@ import { actionScene } from './actionScene'
 import { fnt, ogg, png, wav } from './assets'
 import { g } from './loadingScene'
 import { game } from './main'
+import { overScene } from './overScene'
 import { fadeIn, fadeOut, uiScene } from './uiScene'
 import { addToArrayOnce, randF, randi } from './utils'
+import { winScene } from './winScene'
 
-const MAX_OFFERS = 50
+const MAX_OFFERS = 7
 const OUT_TINT = 0x999999
 
 /** @type {Phaser.Input.Pointer} */
@@ -20,6 +22,12 @@ let cashText
 let incomeText
 /** @type {Phaser.GameObjects.BitmapText} */
 let upkeepText
+
+/** @type {Phaser.GameObjects.BitmapText} */
+let daysText
+/** @type {Phaser.GameObjects.BitmapText} */
+let noPayDaysText
+
 /** @type {HTMLElement} */
 let offersEl
 /** @type {HTMLElement} */
@@ -59,8 +67,8 @@ gameScene.create = function () {
   rentersEl.addEventListener('click', handleRenterClick)
   rentersEl.addEventListener('pointerover', hoverEl)
 
-  const offersCount = randi(20, 40)
-  // const offersCount = randi(3, 10)
+  // const offersCount = randi(20, 40)
+  const offersCount = randi(3, 7)
   for (let i = 0; i < offersCount; i++) {
     generateOffers()
   }
@@ -78,11 +86,24 @@ gameScene.create = function () {
   collectRents()
 
   const deads = renters.filter(o => o.dead).length
-  upkeep = (g.stats.day - 1) * (70 + 17 * deads)
+  const newBills = (g.stats.day - 1) * (25 + 9 * Number(deads))
+  // console.log({ newBills })
+  upkeep += newBills
+  // console.log({ upkeep })
 
   updateUpkeepText()
   updateSpaceText()
   updateCashText()
+  updateDaysText()
+  updateDaysWithNoPayText()
+
+  // gameScene.input.keyboard.on('keydown-Q', () => {
+  //   gameScene.scene.pause()
+  //   fadeOut(() => {
+  //     gameScene.scene.start(actionScene)
+  //   })
+  // })
+
   // updateIncomeText()
 
   calculateIncome()
@@ -93,17 +114,30 @@ gameScene.update = () => {}
 
 function addStartTheDayButton() {
   const nextButton = gameScene.add
-    .image(g.w - 24, g.h - 79, png.nextButton)
+    .image(g.w - 34, g.h - 79, png.nextButton)
     .setOrigin(1)
   nextButton.setInteractive()
   out(nextButton)
   nextButton.on('pointerdown', () => {
     if (renters.length === 0) return
     gameScene.sound.play(ogg.confirm, { volume: 1, detune: randF(0, 100) })
-    fadeOut(() => {
-      gameScene.scene.stop()
-      gameScene.scene.start(actionScene)
-    })
+
+    if (upkeep > 0) {
+      noPays += 1
+      updateDaysWithNoPayText()
+    }
+
+    if (noPays > 3) {
+      fadeOut(() => {
+        gameScene.scene.stop()
+        gameScene.scene.start(overScene)
+      })
+    } else {
+      fadeOut(() => {
+        gameScene.scene.stop()
+        gameScene.scene.start(actionScene)
+      })
+    }
   })
   nextButton.on('pointerout', () => {
     if (renters.length === 0) return
@@ -125,6 +159,8 @@ function addPayBillsButton() {
     if (upkeep > 0 && g.stats.cash >= upkeep) {
       g.stats.cash -= upkeep
       upkeep = 0
+      noPays = 0
+      updateDaysWithNoPayText()
       updateUpkeepText()
     }
     // if (renters.length === 0) return
@@ -151,7 +187,7 @@ function createLeftSideStuff() {
   <div>Offers</div>
 </div>
 <div class="offers sb"></div>
-<div class="sort-btns">
+<div class="sort-btns2">
   <div>Renters</div>
 </div>
 <div class="renters sb"></div>`
@@ -162,17 +198,21 @@ function createLeftSideStuff() {
 
 function createTexts() {
   const FONT_SIZE = 12
-  spaceText = gameScene.add
-    .bitmapText(g.hw, g.h - 42, fnt.topaz, '', FONT_SIZE)
-    .setOrigin(0, 1)
-    .setTintFill(g.pal.white)
-  // updateSpaceText()
 
   cashText = gameScene.add
     .bitmapText(g.hw, g.h - 60, fnt.topaz, '', FONT_SIZE)
     .setOrigin(0, 1)
     .setTintFill(g.pal.white)
-  // updateCashText()
+
+  spaceText = gameScene.add
+    .bitmapText(g.hw, g.h - 42, fnt.topaz, '', FONT_SIZE)
+    .setOrigin(0, 1)
+    .setTintFill(g.pal.white)
+
+  upkeepText = gameScene.add
+    .bitmapText(g.hw, g.h - 38, fnt.topaz, '', FONT_SIZE)
+    .setOrigin(0, 0)
+    .setTintFill(g.pal.white)
 
   incomeText = gameScene.add
     .bitmapText(20, g.h - 38, fnt.topaz, '', FONT_SIZE)
@@ -180,11 +220,15 @@ function createTexts() {
     .setTintFill(g.pal.white)
   // updateIncomeText()
 
-  upkeepText = gameScene.add
-    .bitmapText(g.hw, g.h - 38, fnt.topaz, '', FONT_SIZE)
-    .setOrigin(0, 0)
+  daysText = gameScene.add
+    .bitmapText(g.hw + 155, g.h - 60, fnt.topaz, 'daysText', FONT_SIZE)
+    .setOrigin(0, 1)
     .setTintFill(g.pal.white)
-  // updateUpkeepText()
+
+  noPayDaysText = gameScene.add
+    .bitmapText(g.hw + 155, g.h - 42, fnt.topaz, '', FONT_SIZE)
+    .setOrigin(0, 1)
+    .setTintFill(g.pal.white)
 }
 
 function collectRents() {
@@ -338,7 +382,7 @@ export function updateIncomeText() {
   }
 }
 
-let upkeep
+let upkeep = 0
 export function updateUpkeepText() {
   // const upkeep = getUpkeep()
 
@@ -366,6 +410,15 @@ function calculateIncome(params) {
   }
   // g.stats.income = inc - upkeep
   g.stats.income = inc
+}
+
+export function updateDaysText(params) {
+  daysText.text = `Day: ${g.stats.day}`
+}
+
+let noPays = 0
+export function updateDaysWithNoPayText(params) {
+  noPayDaysText.text = `Not payed for: ${noPays}/3`
 }
 
 /** @param {Phaser.GameObjects.Image} obj  */

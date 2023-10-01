@@ -168,4 +168,7 @@ function loadFiles() {
   for (let i in png) loadingScene.load.image(i)
   for (let i in ogg) loadingScene.load.audio(i, `./${i}.ogg`)
   for (let i in wav) loadingScene.load.audio(i, `./${i}.wav`)
+
+
+  loadingScene.load.image('testtest', [`./${png.actionBG}.png`, `./${png.actionBG_n}.png`])
 }

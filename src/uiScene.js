@@ -1,5 +1,4 @@
 import { actionScene } from './actionScene'
-import { gameScene } from './gameScene'
 import { g, loadingScene } from './loadingScene'
 import { pauseScene } from './pauseScene'
 
@@ -8,9 +7,9 @@ export const uiScene = new Phaser.Scene('uiScene')
 let cover
 uiScene.create = () => {
   const el = document.createElement('div')
-  // el.className = 'cover'
+  el.className = 'cover'
   cover = uiScene.add.dom(0, 0, el).setOrigin(0).setDepth(999)
-  // cover.setInteractive()
+  cover.setInteractive()
 
   uiScene.input.keyboard.on('keyup-ESC', () => {
     if (uiScene.scene.isActive(pauseScene)) {
@@ -22,7 +21,7 @@ uiScene.create = () => {
     }
   })
 
-  debug_addFullScreenButton(uiScene)
+  // debug_addFullScreenButton(uiScene)
 }
 
 uiScene.update = () => {}

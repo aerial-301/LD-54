@@ -1,8 +1,12 @@
 export const png = {
+  "actionBG": "actionBG",
+  "actionBG_n": "actionBG_n",
   "bg": "bg",
   "block": "block",
   "bullet": "bullet",
   "defender": "defender",
+  "exp": "exp",
+  "fire": "fire",
   "nextButton": "nextButton",
   "payButton": "payButton",
   "ssd": "ssd",
@@ -15,7 +19,10 @@ export const ogg = {
   "confirm": "confirm",
   "dismiss": "dismiss",
   "eject": "eject",
+  "exp1": "exp1",
+  "hit": "hit",
   "hover": "hover",
+  "shoot": "shoot",
   "tap": "tap"
 }
 export const wav = {
@@ -24,4 +31,11 @@ export const wav = {
 export const fnt = {
   "topaz": "topaz"
 }
-export const sheets = {}
+export const sheets = {
+  "explosions_32x32s0": {
+    "name": "explosions_32x32s0",
+    "width": 32,
+    "height": 32,
+    "spacing": 0
+  }
+}

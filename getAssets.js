@@ -23,7 +23,8 @@ async function getNames() {
     const [dims, spacing] = name.split('_')[1].split('s')
     const [width, height] = dims.split('x')
     types['sheets'][name] = {
-      name: name.split('_')[0],
+      // name: name.split('_')[0],
+      name: name,
       width: Number(width),
       height: Number(height),
       spacing: Number(spacing),

@@ -4,6 +4,8 @@ import { loadingScene } from './loadingScene'
 import { uiScene } from './uiScene'
 import { actionScene } from './actionScene'
 import { pauseScene } from './pauseScene'
+import { overScene } from './overScene'
+import { winScene } from './winScene'
 const parent = 'main'
 export const game = new Phaser.Game({
   type: Phaser.WEBGL,
@@ -47,7 +49,15 @@ export const game = new Phaser.Game({
       height: 720,
     },
   },
-  scene: [loadingScene, gameScene, , actionScene, pauseScene,  uiScene],
+  scene: [
+    loadingScene,
+    gameScene,
+    actionScene,
+    overScene,
+    winScene,
+    pauseScene,
+    uiScene,
+  ],
 })
 window.oncontextmenu = e => {
   e.preventDefault()
