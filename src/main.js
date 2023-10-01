@@ -2,6 +2,8 @@ import 'phaser'
 import { gameScene } from './gameScene'
 import { loadingScene } from './loadingScene'
 import { uiScene } from './uiScene'
+import { actionScene } from './actionScene'
+import { pauseScene } from './pauseScene'
 const parent = 'main'
 export const game = new Phaser.Game({
   type: Phaser.WEBGL,
@@ -14,6 +16,15 @@ export const game = new Phaser.Game({
   pixelArt: true,
   dom: {
     createContainer: true,
+  },
+
+  physics: {
+    default: 'arcade',
+    arcade: {
+      debug: false,
+      // gravity: { y: 1500 },
+      // gravity: { y: 200 },
+    },
   },
 
   input: {
@@ -36,7 +47,7 @@ export const game = new Phaser.Game({
       height: 720,
     },
   },
-  scene: [loadingScene, gameScene, uiScene],
+  scene: [loadingScene, gameScene, , actionScene, pauseScene,  uiScene],
 })
 window.oncontextmenu = e => {
   e.preventDefault()
