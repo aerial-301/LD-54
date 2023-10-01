@@ -179,3 +179,7 @@ body {
 #tobe1 {
   display: none;
 }
+.dead {
+  pointer-events: none !important;
+  filter: saturate(0);
+}
