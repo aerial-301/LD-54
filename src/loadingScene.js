@@ -1,4 +1,4 @@
-import { fnt, ogg, png, sheets } from './assets'
+import { fnt, ogg, png, sheets, wav } from './assets'
 import {
   gameScene,
   updateCashText,
@@ -47,6 +47,7 @@ export const g = {
   depths: depths,
   pal: pal,
   stats: {
+    day: 1,
     _space: 100,
     _cash: 0,
     _income: 0,
@@ -104,7 +105,6 @@ loadingScene.create = () => {
 
   loadingScene.scene.launch(uiScene)
   uiScene.events.on(Phaser.Scenes.Events.CREATE, () => {
-    console.log('ui created ')
     fadeIn(() => {
       loadingScene.load.start()
     })
@@ -167,4 +167,5 @@ function loadFiles() {
   }
   for (let i in png) loadingScene.load.image(i)
   for (let i in ogg) loadingScene.load.audio(i, `./${i}.ogg`)
+  for (let i in wav) loadingScene.load.audio(i, `./${i}.wav`)
 }
