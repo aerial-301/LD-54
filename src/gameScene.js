@@ -1,10 +1,11 @@
-import { fnt, ogg, png } from './assets'
+import { actionScene } from './actionScene'
+import { fnt, ogg, png, wav } from './assets'
 import { g } from './loadingScene'
 import { game } from './main'
-import { fadeIn, uiScene } from './uiScene'
-import { randi } from './utils'
+import { fadeIn, fadeOut, uiScene } from './uiScene'
+import { addToArrayOnce, randF, randi } from './utils'
 
-const MAX_OFFERS = 15
+const MAX_OFFERS = 50
 const OUT_TINT = 0x999999
 
 /** @type {Phaser.Input.Pointer} */
@@ -25,14 +26,26 @@ let offersEl
 let rentersEl
 
 const tempOffers = []
-const renters = []
+export const renters = []
 let collected
+
+/** @type {Phaser.Sound.WebAudioSound} */
+let bgm
 
 export const gameScene = new Phaser.Scene('gameScene')
 gameScene.create = function () {
   init()
 
-  fadeIn()
+  if (!bgm) {
+    bgm = gameScene.sound.add(wav.BGM, { volume: 0.5, loop: true })
+    bgm.play()
+  } else if (!bgm.isPlaying) {
+    bgm.play()
+  }
+
+  createTexts()
+
+  fadeIn(() => {})
 
   const bg = gameScene.add.image(0, 0, png.bg).setOrigin(0)
 
@@ -40,55 +53,97 @@ gameScene.create = function () {
 
   offersEl = side.querySelector('.offers')
   offersEl.addEventListener('click', handleOfferClick)
+  offersEl.addEventListener('pointerover', hoverEl)
 
   rentersEl = side.querySelector('.renters')
   rentersEl.addEventListener('click', handleRenterClick)
+  rentersEl.addEventListener('pointerover', hoverEl)
 
-  // gameScene.time.addEvent({
-  //   delay: 2500,
-  //   repeat: -1,
-  //   startAt: 2200,
-  //   callback: generateOffers,
-  // })
-  // gameScene.time.addEvent({
-  //   delay: 1000,
-  //   repeat: -1,
-  //   startAt: 0,
-  //   callback: collectRents,
-  // })
-
-  const offersCount = randi(3, 10)
+  const offersCount = randi(20, 40)
+  // const offersCount = randi(3, 10)
   for (let i = 0; i < offersCount; i++) {
     generateOffers()
   }
 
+  for (let r of renters) {
+    createRenter(r)
+  }
+
   gameScene.add.image(g.w - 20, 20, png.ssd).setOrigin(1, 0)
 
+  addStartTheDayButton()
+
+  addPayBillsButton()
+
+  collectRents()
+
+  const deads = renters.filter(o => o.dead).length
+  upkeep = (g.stats.day - 1) * (70 + 17 * deads)
+
+  updateUpkeepText()
+  updateSpaceText()
+  updateCashText()
+  // updateIncomeText()
+
+  calculateIncome()
+}
+
+let interCash = 0
+gameScene.update = () => {}
+
+function addStartTheDayButton() {
   const nextButton = gameScene.add
     .image(g.w - 24, g.h - 79, png.nextButton)
     .setOrigin(1)
   nextButton.setInteractive()
   out(nextButton)
-
   nextButton.on('pointerdown', () => {
-    gameScene.scene.restart()
+    if (renters.length === 0) return
+    gameScene.sound.play(ogg.confirm, { volume: 1, detune: randF(0, 100) })
+    fadeOut(() => {
+      gameScene.scene.stop()
+      gameScene.scene.start(actionScene)
+    })
   })
   nextButton.on('pointerout', () => {
+    if (renters.length === 0) return
     out(nextButton)
   })
   nextButton.on('pointerover', () => {
+    if (renters.length === 0) return
+    gameScene.sound.play(ogg.hover, { volume: 1, detune: randF(0, 100) })
     over(nextButton)
   })
-
-  createTexts()
-
-  collectRents()
-
-  debug_addFullScreenButton(gameScene)
 }
+function addPayBillsButton() {
+  const payButton = gameScene.add
+    .image(g.w - 186, g.h - 79, png.payButton)
+    .setOrigin(1)
+  payButton.setInteractive()
+  out(payButton)
+  payButton.on('pointerdown', () => {
+    if (upkeep > 0 && g.stats.cash >= upkeep) {
+      g.stats.cash -= upkeep
+      upkeep = 0
+      updateUpkeepText()
+    }
+    // if (renters.length === 0) return
 
-let interCash = 0
-gameScene.update = () => {}
+    // gameScene.sound.play(ogg.confirm, { volume: 1, detune: randF(0, 100) })
+    // fadeOut(() => {
+    //   gameScene.scene.start(actionScene)
+    // })
+  })
+  payButton.on('pointerout', () => {
+    // if (renters.length === 0) return
+    out(payButton)
+  })
+  payButton.on('pointerover', () => {
+    // if (renters.length === 0) return
+    gameScene.sound.play(ogg.hover, { volume: 1, detune: randF(0, 100) })
+    over(payButton)
+  })
+}
 
 function createLeftSideStuff() {
   const side = document.createElement('div')
@@ -111,25 +166,25 @@ function createTexts() {
     .bitmapText(g.hw, g.h - 42, fnt.topaz, '', FONT_SIZE)
     .setOrigin(0, 1)
     .setTintFill(g.pal.white)
-  updateSpaceText()
+  // updateSpaceText()
 
   cashText = gameScene.add
     .bitmapText(g.hw, g.h - 60, fnt.topaz, '', FONT_SIZE)
     .setOrigin(0, 1)
     .setTintFill(g.pal.white)
-  updateCashText()
+  // updateCashText()
 
   incomeText = gameScene.add
     .bitmapText(20, g.h - 38, fnt.topaz, '', FONT_SIZE)
     .setOrigin(0, 0)
     .setTintFill(g.pal.white)
-  updateIncomeText()
+  // updateIncomeText()
 
   upkeepText = gameScene.add
     .bitmapText(g.hw, g.h - 38, fnt.topaz, '', FONT_SIZE)
     .setOrigin(0, 0)
     .setTintFill(g.pal.white)
-  getAndUpdateUpkeepText()
+  // updateUpkeepText()
 }
 
 function collectRents() {
@@ -155,27 +210,39 @@ function handleRenterClick(e) {
     g.stats.space += item.space
     removeRenter(index, target.parentNode.parentNode)
     addOffer(item)
+    gameScene.sound.play(ogg.eject, { volume: 1, detune: randF(0, 100) })
   }
 }
 
 function handleOfferClick(e) {
   /** @type {HTMLElement} */
   const target = e.target
-  // console.log(target)
-  if (target.classList.contains('accept')) {
+  const classList = target.classList
+  if (classList.contains('accept')) {
     const index = getIndex(target, tempOffers)
     const item = tempOffers[index]
     if (g.stats.space >= item.space) {
       g.stats.space -= item.space
       removeOffer(index, target.parentNode.parentNode)
       createRenter(item)
+      gameScene.sound.play(ogg.accept, { volume: 1, detune: randF(0, 100) })
     } else {
+      gameScene.sound.play(ogg.can_not, { volume: 0.6, detune: randF(0, 100) })
       // Add stuff later
       console.log('Not enough space')
     }
-  } else if (target.classList.contains('reject')) {
+  } else if (classList.contains('reject')) {
+    gameScene.sound.play(ogg.dismiss, { volume: 1, detune: randF(0, 100) })
     const index = getIndex(target, tempOffers)
     removeOffer(index, target.parentNode.parentNode)
+  }
+}
+
+function hoverEl(e) {
+  /** @type {HTMLElement} */
+  const target = e.target
+  if (target.classList.contains('hov')) {
+    gameScene.sound.play(ogg.hover, { volume: 1, detune: randF(0, 100) })
   }
 }
 
@@ -192,9 +259,10 @@ function getIndex(target, list) {
 }
 
 function createRenter(data) {
-  renters.push(data)
+  addToArrayOnce(data, renters)
+  // renters.push(data)
   const el = document.createElement('div')
-  el.className = 'offer'
+  el.className = `offer ${data.dead ? 'dead' : ''}`
   el.innerHTML = `
   <div class="offer-details">
   <div class="space">${data.space}</div>
@@ -204,6 +272,7 @@ function createRenter(data) {
   <div class="hov eject">Eject</div>
   </div>`
   rentersEl.appendChild(el)
+
   calculateIncome()
 }
 
@@ -254,7 +323,12 @@ export function updateCashText() {
 }
 
 export function updateIncomeText() {
-  incomeText.text = `Income: $${g.stats.income}/day`
+  // console.log('updating inc text')
+  // console.log(g.stats.income)
+  const income = g.stats.income
+  const incT = `Income: $${income}/day`
+  incomeText.text = incT
+  // incomeText.text = `Income: $${100}/day`
   if (g.stats.income > 0) {
     incomeText.setTintFill(g.pal.green4)
   } else if (g.stats.income < 0) {
@@ -264,40 +338,34 @@ export function updateIncomeText() {
   }
 }
 
-export function getAndUpdateUpkeepText() {
-  const upkeep = getUpkeep()
-  upkeepText.text = `Upkeep: $${upkeep}`
-  return upkeep
+let upkeep
+export function updateUpkeepText() {
+  // const upkeep = getUpkeep()
+
+  // console.log(upkeepText)
+  upkeepText.text = `Bills: $${upkeep}`
+  // return upkeep
 }
+
+// function getUpkeep() {
+//   // let upkeep = 0
+//   // for (let renter of renters) {
+//   //   upkeep += Math.round(renter.space * 1.27)
+//   // }
+//   // return upkeep
+//   // return (g.stats.day - 1) * 70
+// }
 
 function calculateIncome(params) {
-  const upkeep = getAndUpdateUpkeepText()
+  // const upkeep = updateUpkeepText()
   let inc = 0
   for (let renter of renters) {
-    inc += renter.rent
+    if (!renter.dead) {
+      inc += renter.rent
+    }
   }
-  g.stats.income = inc - upkeep
-}
-
-function getUpkeep(params) {
-  let upkeep = 0
-  for (let renter of renters) {
-    upkeep += Math.round(renter.space * 1.27)
-  }
-  return upkeep
-}
-
-/** @param {Phaser.Scene} scene*/
-export function debug_addFullScreenButton(scene) {
-  const btn = scene.add
-    .image(g.w - 4, g.h - 4, '__WHITE')
-    .setOrigin(1)
-    .setAlpha(0.2)
-    .setDisplaySize(32, 32)
-  btn.setInteractive()
-  btn.on('pointerdown', () => {
-    scene.scale.toggleFullscreen()
-  })
+  // g.stats.income = inc - upkeep
+  g.stats.income = inc
 }
 
 /** @param {Phaser.GameObjects.Image} obj  */
