@@ -111,7 +111,7 @@ body {
   white-space: pre;
 }
 .rent::after {
-  content: '/s';
+  content: '/d';
 }
 .rent::before {
   content: '$';
@@ -179,6 +179,7 @@ body {
 #tobe1 {
   display: none;
 }
+
 .dead {
   pointer-events: none !important;
   filter: saturate(0);
