@@ -5,6 +5,15 @@ uiScene.create = () => {
   const el = document.createElement('div')
   el.className = 'cover'
   cover = uiScene.add.dom(0, 0, el).setOrigin(0).setDepth(999)
+  uiScene.input.keyboard.on('keyup-ESC', () => {
+    if (uiScene.scene.isActive(pauseScene)) {
+      uiScene.scene.stop(pauseScene)
+      uiScene.scene.resume(actionScene)
+    } else if (uiScene.scene.isActive(actionScene)) {
+      uiScene.scene.launch(pauseScene)
+      uiScene.scene.pause(actionScene)
+    }
+  })
 }
 
 uiScene.update = () => {}
