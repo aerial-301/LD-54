@@ -183,3 +183,13 @@ body {
   pointer-events: none !important;
   filter: saturate(0);
 }
+
+.pause {
+  width: 100%;
+  height: 100%;
+  background-color: #000000dd;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  font-size: 3rem;
+}
